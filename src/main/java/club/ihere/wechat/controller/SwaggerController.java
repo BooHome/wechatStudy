@@ -1,5 +1,7 @@
 package club.ihere.wechat.controller;
 
+import club.ihere.common.api.config.ApiConfig;
+import club.ihere.wechat.common.config.WeChatConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.MediaType;
@@ -31,5 +33,12 @@ public class SwaggerController {
     @ResponseBody
     public String post(String param) {
         return param;
+    }
+
+    @PostMapping(value = "api", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "api方法测试", notes = "api方法测试")
+    @ResponseBody
+    public ApiConfig api() {
+        return WeChatConfig.apiConfig;
     }
 }
