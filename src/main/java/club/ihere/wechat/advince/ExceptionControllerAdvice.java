@@ -25,6 +25,7 @@ public class ExceptionControllerAdvice {
 
     /**
      * 全局异常捕捉处理
+     *
      * @param ex
      * @return
      */
@@ -32,13 +33,14 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(value = Exception.class)
     public Map errorHandler(Exception ex) {
         Map map = new HashMap();
-        map.put("code", 100);
-        map.put("msg", ex.getMessage());
+        map.put("status", false);
+        map.put("message", ex.getMessage());
         return map;
     }
 
     /**
      * 拦截捕捉自定义异常 MyException.class
+     *
      * @param ex
      * @return
      */
@@ -46,8 +48,8 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(value = ParamException.class)
     public Map myErrorHandler(ParamException ex) {
         Map map = new HashMap();
-        map.put("code", ex.getCode());
-        map.put("msg", ex.getMsg());
+        map.put("status", false);
+        map.put("message", ex.getMessage());
         return map;
     }
 

@@ -1,9 +1,12 @@
 package club.ihere.wechat.controller;
 
 import club.ihere.common.api.config.ApiConfig;
+import club.ihere.wechat.aspect.annotation.AvoidRepeatableCommit;
 import club.ihere.wechat.common.config.WeChatConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("swagger")
 @Api(tags = "swagger测试接口")
 public class SwaggerController {
+
+    private static Logger logger = LoggerFactory.getLogger(SwaggerController.class);
 
     @GetMapping(value = "get", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "get方法测试", notes = "get方法测试")
@@ -40,5 +45,12 @@ public class SwaggerController {
     @ResponseBody
     public ApiConfig api() {
         return WeChatConfig.apiConfig;
+    }
+
+    @PostMapping(value = "commit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "commit方法测试", notes = "commit方法测试")
+    @ResponseBody
+    @AvoidRepeatableCommit(timeout = 5000)
+    public void commit() {
     }
 }
