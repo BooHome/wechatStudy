@@ -1,5 +1,9 @@
 ### wechatStudy ###
 
+###### wechat公众号接口模块： ######
+1. 暂时引用fastweixin
+2. 
+
 ###### redis使用相关： ######
 1. 配置redisTemplate 注入方式使用@Resource(name="") 方式注入
 2. 
