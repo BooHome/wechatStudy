@@ -9,6 +9,7 @@ import club.ihere.wechat.mapper.base.BaseTestMapper;
 import club.ihere.wechat.mapper.shiro.ShiroTestMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.codec.digest.Md5Crypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,10 +77,10 @@ public class SwaggerController {
     @ResponseBody
     @AvoidRepeatableCommit(timeout = 5000)
     public void redis() {
-        BaseTest baseTest=new BaseTest();
+        BaseTest baseTest = new BaseTest();
         baseTest.setId(1);
         baseTest.setRemark("测试用例");
-        redisTemplate.opsForValue().set("baseTest",baseTest);
+        redisTemplate.opsForValue().set("baseTest", baseTest);
     }
 
     @PostMapping(value = "mysql", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,10 +89,10 @@ public class SwaggerController {
     @AvoidRepeatableCommit(timeout = 5000)
     public void mysql() {
         logger.info("测试日志");
-        BaseTest baseTest=new BaseTest();
+        BaseTest baseTest = new BaseTest();
         baseTest.setId(1);
         baseTest.setRemark("测试用例base");
-        ShiroTest shiroTest=new ShiroTest();
+        ShiroTest shiroTest = new ShiroTest();
         shiroTest.setId(1);
         shiroTest.setRemark("测试用例shiro");
         baseTestMapper.insert(baseTest);

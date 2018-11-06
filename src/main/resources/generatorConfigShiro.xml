@@ -42,7 +42,7 @@
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
         <!-- 列出要生成代码的所有表，这里配置的是生成Example文件 -->
-        <table tableName="shiro_test" domainObjectName="ShiroTest"
+        <table tableName="%" domainObjectName=""
                enableCountByExample="true" enableUpdateByExample="true" enableDeleteByExample="true"
                enableSelectByExample="true" selectByExampleQueryId="true" >
             <property name="useActualColumnNames" value="false"/>
