@@ -2,7 +2,10 @@ package club.ihere.wechat.mapper.shiro;
 
 import club.ihere.wechat.bean.pojo.shiro.SysResources;
 import club.ihere.wechat.bean.pojo.shiro.SysResourcesExample;
+
 import java.util.List;
+import java.util.Set;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface SysResourcesMapper {
@@ -27,4 +30,6 @@ public interface SysResourcesMapper {
     int updateByPrimaryKeySelective(SysResources record);
 
     int updateByPrimaryKey(SysResources record);
+
+    Set<String> findRoleNameByUserId(@Param("userId") int userId);
 }

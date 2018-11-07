@@ -6,7 +6,6 @@ import club.ihere.wechat.service.shiro.ResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,8 +15,7 @@ public class ResourcesServiceImpl implements ResourcesService {
 
     @Override
     public List<SysResources> selectAll() {
-      /*   List<SysResources> resourcesList = sysResourcesMapper.selectAll();
-         return resourcesList;*/
-        return null;
+        List<SysResources> resourcesList = sysResourcesMapper.selectByExample(null);
+        return resourcesList;
     }
 }

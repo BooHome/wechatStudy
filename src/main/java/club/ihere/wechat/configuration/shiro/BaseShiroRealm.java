@@ -46,7 +46,7 @@ public class BaseShiroRealm extends AuthorizingRealm {
         user.setUserName(name);
         user.setPassWord(password);
         // 从数据库获取对应用户名密码的用户
-        SysUser userList = userService.getUser(user);
+        SysUser userList = userService.getUserByUserInfo(user);
         if (userList != null) {
             // 用户为禁用状态
             if (userList.getUserEnable() != 1) {
@@ -78,7 +78,6 @@ public class BaseShiroRealm extends AuthorizingRealm {
             SysUser userLogin = (SysUser) principal;
             Set<String> roles = roleService.findRoleNameByUserId(userLogin.getId());
             authorizationInfo.addRoles(roles);
-
             Set<String> permissions = userService.findPermissionsByUserId(userLogin.getId());
             authorizationInfo.addStringPermissions(permissions);
         }

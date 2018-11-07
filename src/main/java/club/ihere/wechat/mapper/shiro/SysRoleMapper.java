@@ -3,6 +3,8 @@ package club.ihere.wechat.mapper.shiro;
 import club.ihere.wechat.bean.pojo.shiro.SysRole;
 import club.ihere.wechat.bean.pojo.shiro.SysRoleExample;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface SysRoleMapper {
@@ -27,4 +29,6 @@ public interface SysRoleMapper {
     int updateByPrimaryKeySelective(SysRole record);
 
     int updateByPrimaryKey(SysRole record);
+
+    Set<String> findRoleNameByUserId(@Param("userId") int userId);
 }

@@ -15,7 +15,6 @@ public class SysRoleServiceImpl implements SysRoleService {
 
     @Override
     public Set<String> findRoleNameByUserId(int userId) {
-        return null;
-        //return sysRoleMapper.findRoleNameByUserId(userId);
+       return sysRoleMapper.findRoleNameByUserId(userId);
     }
 }
