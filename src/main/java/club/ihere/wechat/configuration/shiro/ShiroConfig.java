@@ -60,26 +60,25 @@ public class ShiroConfig {
         //必须设置 SecurityManager,Shiro的核心安全接口
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         //这里的/login是后台的接口名,非页面，如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
-        shiroFilterFactoryBean.setLoginUrl("/");
+        shiroFilterFactoryBean.setLoginUrl("/auth/login");
         //这里的/index是后台的接口名,非页面,登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/index");
+        shiroFilterFactoryBean.setSuccessUrl("/auth/toIndex");
         //未授权界面,该配置无效，并不会进行页面跳转
         shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
-
         //自定义拦截器限制并发人数,参考博客：
         LinkedHashMap<String, Filter> filtersMap = new LinkedHashMap<>();
         //限制同一帐号同时在线的个数
         filtersMap.put("kickout", kickoutSessionControlFilter());
         //统计登录人数
         shiroFilterFactoryBean.setFilters(filtersMap);
-
         // 配置访问权限 必须是LinkedHashMap，因为它必须保证有序
         // 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 --> : 这是一个坑，一不小心代码就不好使了
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         //配置不登录可以访问的资源，anon 表示资源都可以匿名访问
         //配置记住我或认证通过可以访问的地址
-        filterChainDefinitionMap.put("/login", "anon");
+        filterChainDefinitionMap.put("/auth/toLogin", "anon");
         filterChainDefinitionMap.put("/", "anon");
+        filterChainDefinitionMap.put("/auth/index", "anon");
 
         filterChainDefinitionMap.put("/swagger-resources", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");
@@ -90,13 +89,13 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/css/**", "anon");
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/img/**", "anon");
+        filterChainDefinitionMap.put("/Captcha.jpg", "anon");
 
         filterChainDefinitionMap.put("/druid/**", "anon");
         //解锁用户专用 测试用的
         filterChainDefinitionMap.put("/unlockAccount", "anon");
-        filterChainDefinitionMap.put("/Captcha.jpg", "anon");
         //logout是shiro提供的过滤器
-        filterChainDefinitionMap.put("/logout", "logout");
+        filterChainDefinitionMap.put("/auth/logout", "logout");
         //此时访问/user/delete需要delete权限,在自定义Realm中为用户授权。
         //filterChainDefinitionMap.put("/user/delete", "perms[\"user:delete\"]");
 
@@ -133,7 +132,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean(name = "lifecycleBeanPostProcessor")
+    @Bean(name = "lifecycleBeanPostProcessor")
     public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
         return new LifecycleBeanPostProcessor();
     }
@@ -143,7 +142,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public BaseShiroRealm shiroRealm() {
         BaseShiroRealm shiroRealm = new BaseShiroRealm();
         shiroRealm.setCachingEnabled(true);
@@ -179,7 +178,7 @@ public class ShiroConfig {
      * @param securityManager
      * @return
      */
-    //@Bean
+    @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(@Qualifier("securityManager") SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
@@ -195,7 +194,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public SimpleMappingExceptionResolver simpleMappingExceptionResolver() {
         SimpleMappingExceptionResolver simpleMappingExceptionResolver = new SimpleMappingExceptionResolver();
         Properties properties = new Properties();
@@ -233,7 +232,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public SimpleCookie rememberMeCookie() {
         //这个参数是cookie的名称，对应前端的checkbox的name = rememberMe
         SimpleCookie simpleCookie = new SimpleCookie("rememberMe");
@@ -253,7 +252,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public CookieRememberMeManager rememberMeManager() {
         CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
         cookieRememberMeManager.setCookie(rememberMeCookie());
@@ -267,7 +266,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public FormAuthenticationFilter formAuthenticationFilter() {
         FormAuthenticationFilter formAuthenticationFilter = new FormAuthenticationFilter();
         //对应前端的checkbox的name = rememberMe
@@ -281,12 +280,12 @@ public class ShiroConfig {
      *
      * @return
      */
-    //  @Bean(name="redisCacheManager")
+    @Bean(name = "redisCacheManager")
     public RedisCacheManager cacheManager() {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
         //redis中针对不同用户缓存
-        redisCacheManager.setPrincipalIdFieldName("username");
+        redisCacheManager.setPrincipalIdFieldName("userName");
         //用户权限信息缓存时间
         redisCacheManager.setExpire(200000);
         return redisCacheManager;
@@ -298,7 +297,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    //@Bean
+    @Bean
     public MethodInvokingFactoryBean getMethodInvokingFactoryBean() {
         MethodInvokingFactoryBean factoryBean = new MethodInvokingFactoryBean();
         factoryBean.setStaticMethod("org.apache.shiro.SecurityUtils.setSecurityManager");
@@ -311,7 +310,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean("sessionListener")
+    @Bean("sessionListener")
     public ShiroSessionListener sessionListener() {
         ShiroSessionListener sessionListener = new ShiroSessionListener();
         return sessionListener;
@@ -322,18 +321,18 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public SessionIdGenerator sessionIdGenerator() {
         return new JavaUuidSessionIdGenerator();
     }
 
-    //@Bean
+    @Bean
     public RedisManager redisManager() {
         RedisManager redisManager = new RedisManager();
         return redisManager;
     }
 
-    // @Bean("sessionFactory")
+    @Bean("sessionFactory")
     public ShiroSessionFactory sessionFactory() {
         ShiroSessionFactory sessionFactory = new ShiroSessionFactory();
         return sessionFactory;
@@ -346,7 +345,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    //  @Bean
+    @Bean
     public SessionDAO sessionDAO() {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
@@ -362,7 +361,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean("sessionIdCookie")
+    @Bean("sessionIdCookie")
     public SimpleCookie sessionIdCookie() {
         //这个参数是cookie的名称
         SimpleCookie simpleCookie = new SimpleCookie("sid");
@@ -383,7 +382,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean("sessionManager")
+    @Bean("sessionManager")
     public SessionManager sessionManager() {
         ShiroSessionManager sessionManager = new ShiroSessionManager();
         Collection<SessionListener> listeners = new ArrayList<SessionListener>();
@@ -416,7 +415,6 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
     public KickoutSessionControlFilter kickoutSessionControlFilter() {
         KickoutSessionControlFilter kickoutSessionControlFilter = new KickoutSessionControlFilter();
         //用于根据会话ID，获取会话进行踢出操作的；
@@ -428,7 +426,7 @@ public class ShiroConfig {
         //同一个用户最大的会话数，默认1；比如2的意思是同一个用户允许最多同时两个人登录；
         kickoutSessionControlFilter.setMaxSession(1);
         //被踢出后重定向到的地址；
-        kickoutSessionControlFilter.setKickoutUrl("/login?kickout=1");
+        kickoutSessionControlFilter.setKickoutUrl("/auth/toLogin?kickout=1");
         return kickoutSessionControlFilter;
     }
 
@@ -437,7 +435,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    //@Bean("credentialsMatcher")
+    @Bean("credentialsMatcher")
     public RetryLimitHashedCredentialsMatcher retryLimitHashedCredentialsMatcher() {
         RetryLimitHashedCredentialsMatcher retryLimitHashedCredentialsMatcher = new RetryLimitHashedCredentialsMatcher();
         retryLimitHashedCredentialsMatcher.setRedisManager(redisManager());

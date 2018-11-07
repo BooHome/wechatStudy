@@ -6,6 +6,9 @@ import java.io.Serializable;
  * @author
  */
 public class SysResources implements Serializable {
+
+    private static final long serialVersionUID = 8841433872811285796L;
+
     private Integer id;
 
     private String userName;

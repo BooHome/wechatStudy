@@ -1,6 +1,7 @@
 package club.ihere.wechat.configuration.redis;
 
 import club.ihere.wechat.common.config.RedisConstantConfig;
+import club.ihere.wechat.common.util.SerializeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * @author: fengshibo
@@ -36,9 +38,13 @@ public class ShiroRedisConfig extends RedisConfig {
      */
     @Bean(name = "shiroRedisTemplate")
     public RedisTemplate shiroRedisTemplate() {
-        return super.getRedisTemplate(shiroRedisConnectionFactory());
+        RedisTemplate redisTemplate = super.getRedisTemplate(shiroRedisConnectionFactory());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new SerializeUtils());
+        redisTemplate.setValueSerializer(new SerializeUtils());
+        return redisTemplate;
     }
-
 
 
 }

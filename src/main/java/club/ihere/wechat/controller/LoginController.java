@@ -37,16 +37,14 @@ public class LoginController {
 
     @PostMapping(value = "login", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "login", notes = "login")
-    @ResponseBody
     @AvoidRepeatableCommit
-    public JsonResult<SysUser> submitLogin(String username, String password) {
+    public void submitLogin(String username, String password) {
         try {
             UsernamePasswordToken token = new UsernamePasswordToken(username, password);
             Subject subject = SecurityUtils.getSubject();
             subject.login(token);
             SysUser user = (SysUser) subject.getPrincipal();
             // 执行到这里说明用户已登录成功
-            return JsonResultBuilder.build(user);
         } catch (LockedAccountException e) {
             throw new ParameterValidationException("账户已被锁定");
         } catch (DisabledAccountException e) {
@@ -80,6 +78,7 @@ public class LoginController {
     @ApiOperation(value = "退出", notes = "退出")
     @ResponseBody
     public JsonResult<String> logoutSuccessMessage() {
+
         return JsonResultBuilder.build("退出成功");
     }
 

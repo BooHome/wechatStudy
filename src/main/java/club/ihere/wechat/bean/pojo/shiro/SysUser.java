@@ -3,6 +3,9 @@ package club.ihere.wechat.bean.pojo.shiro;
 import java.io.Serializable;
 
 public class SysUser implements Serializable {
+
+    private static final long serialVersionUID = 8841433872811285799L;
+
     private Integer id;
 
     private String userName;
