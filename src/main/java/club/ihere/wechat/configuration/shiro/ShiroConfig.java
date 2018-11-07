@@ -1,6 +1,6 @@
 package club.ihere.wechat.configuration.shiro;
 
-import club.ihere.wechat.configuration.redis.ShiroRedisConfig;
+import club.ihere.wechat.configuration.redis.RedisConfig;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
@@ -11,9 +11,9 @@ import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisManager;
 import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import redis.clients.jedis.JedisPoolConfig;
 
 import javax.servlet.Filter;
 import java.util.LinkedHashMap;
@@ -21,8 +21,25 @@ import java.util.Map;
 
 
 @Configuration
-public class ShiroConfig extends ShiroRedisConfig {
+public class ShiroConfig extends RedisConfig {
 
+    @Value("${spring.redis.shiro.database}")
+    private int dbIndex;
+
+    @Value("${spring.redis.shiro.host}")
+    private String host;
+
+    @Value("${spring.redis.shiro.port}")
+    private int port;
+
+    @Value("${spring.redis.shiro.password}")
+    private String password;
+
+    @Value("${spring.redis.shiro.timeout}")
+    private int timeout;
+
+    @Value("${spring.redis.shiro.expire}")
+    private int expire;
     @Bean
     public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
@@ -83,6 +100,7 @@ public class ShiroConfig extends ShiroRedisConfig {
     public RedisCacheManager cacheManager() {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
+        redisCacheManager.setExpire(expire);
         return redisCacheManager;
     }
 
@@ -94,7 +112,13 @@ public class ShiroConfig extends ShiroRedisConfig {
      */
     public RedisManager redisManager() {
         RedisManager redisManager = new RedisManager();
-        redisManager.setJedisPoolConfig((JedisPoolConfig) super.shiroRedisConnectionFactory().getPoolConfig());
+        redisManager.setJedisPoolConfig(setPoolConfig(redisPoolMaxIdle, redisPoolMinIdle, redisPoolMaxActive, redisPoolMaxWait, true));
+        redisManager.setDatabase(dbIndex);
+        redisManager.setHost(host);
+        redisManager.setPort(port);
+        // 配置缓存过期时间
+        redisManager.setTimeout(timeout);
+        redisManager.setPassword(password);
         return redisManager;
     }
 
@@ -158,7 +182,7 @@ public class ShiroConfig extends ShiroRedisConfig {
      * @return
      */
     @Bean
-    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager){
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
         return authorizationAttributeSourceAdvisor;
@@ -166,7 +190,6 @@ public class ShiroConfig extends ShiroRedisConfig {
 
     /**
      * Shiro生命周期处理器
-     *
      */
     @Bean
     public LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {

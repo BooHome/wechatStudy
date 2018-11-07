@@ -10,6 +10,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -24,16 +25,16 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisConfig {
 
     @Value("${spring.redis.jedis.pool.max-active}")
-    private int redisPoolMaxActive;
+    protected int redisPoolMaxActive;
 
     @Value("${spring.redis.jedis.pool.max-wait}")
-    private int redisPoolMaxWait;
+    protected int redisPoolMaxWait;
 
     @Value("${spring.redis.jedis.pool.max-idle}")
-    private int redisPoolMaxIdle;
+    protected int redisPoolMaxIdle;
 
     @Value("${spring.redis.jedis.pool.min-idle}")
-    private int redisPoolMinIdle;
+    protected int redisPoolMinIdle;
 
     /**
      * 创建redis连接工厂
@@ -83,15 +84,23 @@ public class RedisConfig {
      * @param redisTemplate
      */
     public void setSerializer(RedisTemplate redisTemplate) {
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+        // 设置序列化
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(
+                Object.class);
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
-        //设置键（key）的序列化方式
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        //设置值（value）的序列化方式
+        // 配置redisTemplate
+        RedisSerializer<?> stringSerializer = new StringRedisSerializer();
+        // key序列化
+        redisTemplate.setKeySerializer(stringSerializer);
+        // value序列化
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
+        // Hash key序列化
+        redisTemplate.setHashKeySerializer(stringSerializer);
+        // Hash value序列化
+        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.afterPropertiesSet();
     }
 

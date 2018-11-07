@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="club.ihere.wechat.mapper.shiro.ShiroTestMapper">
-  <resultMap id="BaseResultMap" type="club.ihere.wechat.bean.pojo.shiro.ShiroTest">
-    <id column="ID" jdbcType="INTEGER" property="id" />
-    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+<mapper namespace="club.ihere.wechat.mapper.shiro.SysRoleMapper">
+  <resultMap id="BaseResultMap" type="club.ihere.wechat.bean.pojo.shiro.SysRole">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="role_desc" jdbcType="VARCHAR" property="roleDesc" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -64,16 +64,16 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    ID, REMARK
+    id, role_desc
   </sql>
-  <select id="selectByExample" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTestExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRoleExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
     'true' as QUERYID,
     <include refid="Base_Column_List" />
-    from shiro_test
+    from sys_role
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -84,56 +84,56 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
-    from shiro_test
-    where ID = #{id,jdbcType=INTEGER}
+    from sys_role
+    where id = #{id,jdbcType=INTEGER}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from shiro_test
-    where ID = #{id,jdbcType=INTEGER}
+    delete from sys_role
+    where id = #{id,jdbcType=INTEGER}
   </delete>
-  <delete id="deleteByExample" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTestExample">
-    delete from shiro_test
+  <delete id="deleteByExample" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRoleExample">
+    delete from sys_role
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTest">
-    insert into shiro_test (ID, REMARK)
-    values (#{id,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR})
+  <insert id="insert" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRole">
+    insert into sys_role (id, role_desc)
+    values (#{id,jdbcType=INTEGER}, #{roleDesc,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTest">
-    insert into shiro_test
+  <insert id="insertSelective" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRole">
+    insert into sys_role
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
-        ID,
+        id,
       </if>
-      <if test="remark != null">
-        REMARK,
+      <if test="roleDesc != null">
+        role_desc,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
         #{id,jdbcType=INTEGER},
       </if>
-      <if test="remark != null">
-        #{remark,jdbcType=VARCHAR},
+      <if test="roleDesc != null">
+        #{roleDesc,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTestExample" resultType="java.lang.Long">
-    select count(*) from shiro_test
+  <select id="countByExample" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRoleExample" resultType="java.lang.Long">
+    select count(*) from sys_role
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    update shiro_test
+    update sys_role
     <set>
       <if test="record.id != null">
-        ID = #{record.id,jdbcType=INTEGER},
+        id = #{record.id,jdbcType=INTEGER},
       </if>
-      <if test="record.remark != null">
-        REMARK = #{record.remark,jdbcType=VARCHAR},
+      <if test="record.roleDesc != null">
+        role_desc = #{record.roleDesc,jdbcType=VARCHAR},
       </if>
     </set>
     <if test="_parameter != null">
@@ -141,25 +141,25 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update shiro_test
-    set ID = #{record.id,jdbcType=INTEGER},
-      REMARK = #{record.remark,jdbcType=VARCHAR}
+    update sys_role
+    set id = #{record.id,jdbcType=INTEGER},
+      role_desc = #{record.roleDesc,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTest">
-    update shiro_test
+  <update id="updateByPrimaryKeySelective" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRole">
+    update sys_role
     <set>
-      <if test="remark != null">
-        REMARK = #{remark,jdbcType=VARCHAR},
+      <if test="roleDesc != null">
+        role_desc = #{roleDesc,jdbcType=VARCHAR},
       </if>
     </set>
-    where ID = #{id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="club.ihere.wechat.bean.pojo.shiro.ShiroTest">
-    update shiro_test
-    set REMARK = #{remark,jdbcType=VARCHAR}
-    where ID = #{id,jdbcType=INTEGER}
+  <update id="updateByPrimaryKey" parameterType="club.ihere.wechat.bean.pojo.shiro.SysRole">
+    update sys_role
+    set role_desc = #{roleDesc,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
