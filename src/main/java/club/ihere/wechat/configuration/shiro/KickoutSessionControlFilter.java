@@ -8,8 +8,11 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -22,16 +25,21 @@ import java.util.LinkedList;
  */
 public class KickoutSessionControlFilter extends AccessControlFilter {
 
-   // @Autowired
-   // private ResourceUrlProvider resourceUrlProvider;
+    private ResourceUrlProvider resourceUrlProvider;
 
-    /** 踢出后到的地址 */
+    /**
+     * 踢出后到的地址
+     */
     private String kickoutUrl;
 
-    /**  踢出之前登录的/之后登录的用户 默认踢出之前登录的用户 */
+    /**
+     * 踢出之前登录的/之后登录的用户 默认踢出之前登录的用户
+     */
     private boolean kickoutAfter = false;
 
-    /**  同一个帐号最大会话数 默认1 */
+    /**
+     * 同一个帐号最大会话数 默认1
+     */
     private int maxSession = 1;
     private SessionManager sessionManager;
 
@@ -79,22 +87,23 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
         return false;
     }
+
     /**
      * 表示访问拒绝时是否自己处理，如果返回true表示自己不处理且继续拦截器链执行，返回false表示自己已经处理了（比如重定向到另一个页面）。
      */
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
         Subject subject = getSubject(request, response);
-        if(!subject.isAuthenticated() && !subject.isRemembered()) {
+        if (!subject.isAuthenticated() && !subject.isRemembered()) {
             //如果没有登录，直接进行之后的流程
             return true;
         }
 
         //如果有登录,判断是否访问的为静态资源，如果是游客允许访问的静态资源,直接返回true
-        HttpServletRequest httpServletRequest = (HttpServletRequest)request;
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String path = httpServletRequest.getServletPath();
         // 如果是静态文件，则返回true
-        if (isStaticFile(path)){
+        if (isStaticFile(path)) {
             return true;
         }
         Session session = subject.getSession();
@@ -105,21 +114,21 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
 
         // 初始化用户的队列放到缓存里
         Deque<Serializable> deque = (Deque<Serializable>) redisManager.get(getRedisKickoutKey(username));
-        if(deque == null || deque.size()==0) {
+        if (deque == null || deque.size() == 0) {
             deque = new LinkedList<Serializable>();
         }
 
         //如果队列里没有此sessionId，且用户没有被踢出；放入队列
-        if(!deque.contains(sessionId) && session.getAttribute("kickout") == null) {
+        if (!deque.contains(sessionId) && session.getAttribute("kickout") == null) {
             deque.push(sessionId);
         }
 
         //如果队列里的sessionId数超出最大会话数，开始踢人
-        while(deque.size() > maxSession) {
+        while (deque.size() > maxSession) {
             Serializable kickoutSessionId = null;
             //如果踢出后者
-            if(kickoutAfter) {
-                kickoutSessionId=deque.getFirst();
+            if (kickoutAfter) {
+                kickoutSessionId = deque.getFirst();
                 kickoutSessionId = deque.removeFirst();
             } else {
                 //否则踢出前者
@@ -127,7 +136,7 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
             }
             try {
                 Session kickoutSession = sessionManager.getSession(new DefaultSessionKey(kickoutSessionId));
-                if(kickoutSession != null) {
+                if (kickoutSession != null) {
                     //设置会话的kickout属性表示踢出了
                     kickoutSession.setAttribute("kickout", true);
                 }
@@ -153,9 +162,9 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
     }
 
     private boolean isStaticFile(String path) {
-       // String staticUri = resourceUrlProvider.getForLookupPath(path);
-       // return staticUri != null;
-        return true;
+//        String staticUri = resourceUrlProvider.getForLookupPath(path);
+        //      return staticUri != null;
+        return false;
     }
 
 }

@@ -4,8 +4,7 @@ import java.io.Serializable;
 
 public class SysUser implements Serializable {
 
-    private static final long serialVersionUID = 8841433872811285799L;
-
+    private static final long serialVersionUID = 123456783L;
     private Integer id;
 
     private String userName;

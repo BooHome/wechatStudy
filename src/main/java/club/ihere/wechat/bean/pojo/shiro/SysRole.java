@@ -2,13 +2,12 @@ package club.ihere.wechat.bean.pojo.shiro;
 
 import java.io.Serializable;
 
-public class SysRole implements Serializable{
+public class SysRole implements Serializable {
 
-    private static final long serialVersionUID = 8841433872811285797L;
-
+    private static final long serialVersionUID = 123456781L;
     private Integer id;
 
-    private String roleDesc;
+    private String desc;
 
     public Integer getId() {
         return id;
@@ -18,11 +17,11 @@ public class SysRole implements Serializable{
         this.id = id;
     }
 
-    public String getRoleDesc() {
-        return roleDesc;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setRoleDesc(String roleDesc) {
-        this.roleDesc = roleDesc == null ? null : roleDesc.trim();
+    public void setDesc(String desc) {
+        this.desc = desc == null ? null : desc.trim();
     }
 }

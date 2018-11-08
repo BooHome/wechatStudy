@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 import javax.servlet.Filter;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class ShiroConfig {
         //这里的/login是后台的接口名,非页面，如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
         shiroFilterFactoryBean.setLoginUrl("/auth/login");
         //这里的/index是后台的接口名,非页面,登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/index.html");
+        shiroFilterFactoryBean.setSuccessUrl("/auth/index");
         //未授权界面,该配置无效，并不会进行页面跳转
         shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
         //自定义拦截器限制并发人数,参考博客：
@@ -95,7 +96,7 @@ public class ShiroConfig {
 
         filterChainDefinitionMap.put("/druid/**", "anon");
         //解锁用户专用 测试用的
-        filterChainDefinitionMap.put("/unlockAccount", "anon");
+        filterChainDefinitionMap.put("/auth/unlockAccount", "anon");
         //logout是shiro提供的过滤器
         filterChainDefinitionMap.put("/auth/logout", "logout");
         filterChainDefinitionMap.put("/logout.html", "logout");
@@ -168,7 +169,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public ShiroDialect shiroDialect() {
         return new ShiroDialect();
     }
@@ -202,8 +203,8 @@ public class ShiroConfig {
         SimpleMappingExceptionResolver simpleMappingExceptionResolver = new SimpleMappingExceptionResolver();
         Properties properties = new Properties();
         //这里的 /unauthorized 是页面，不是访问的路径
-        properties.setProperty("org.apache.shiro.authz.UnauthorizedException", "/unauthorized");
-        properties.setProperty("org.apache.shiro.authz.UnauthenticatedException", "/unauthorized");
+        properties.setProperty("org.apache.shiro.authz.UnauthorizedException", "/unauthorized.html");
+        properties.setProperty("org.apache.shiro.authz.UnauthenticatedException", "/unauthorized.html");
         simpleMappingExceptionResolver.setExceptionMappings(properties);
         return simpleMappingExceptionResolver;
     }
@@ -213,7 +214,7 @@ public class ShiroConfig {
      *
      * @return
      */
-    // @Bean
+    @Bean
     public WebServerFactoryCustomizer<ConfigurableWebServerFactory> containerCustomizer() {
         return new WebServerFactoryCustomizer<ConfigurableWebServerFactory>() {
             @Override
@@ -307,6 +308,7 @@ public class ShiroConfig {
         factoryBean.setArguments(new Object[]{securityManager()});
         return factoryBean;
     }
+
 
     /**
      * 配置session监听

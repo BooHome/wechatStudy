@@ -5,26 +5,20 @@ import club.ihere.wechat.bean.pojo.shiro.SysUser;
 import club.ihere.wechat.common.exception.ParameterValidationException;
 import club.ihere.wechat.common.json.JsonResult;
 import club.ihere.wechat.common.json.JsonResultBuilder;
-import club.ihere.wechat.common.util.RequestUtils;
+import club.ihere.wechat.configuration.shiro.RetryLimitHashedCredentialsMatcher;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.DisabledAccountException;
-import org.apache.shiro.authc.ExcessiveAttemptsException;
-import org.apache.shiro.authc.ExpiredCredentialsException;
-import org.apache.shiro.authc.LockedAccountException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 
 /**
@@ -34,6 +28,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/auth")
 @Api(tags = "登陆测试接口")
 public class LoginController {
+
+    @Resource(name = "credentialsMatcher")
+    private RetryLimitHashedCredentialsMatcher retryLimitHashedCredentialsMatcher;
 
     @PostMapping(value = "login", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "login", notes = "login")
@@ -64,7 +61,7 @@ public class LoginController {
         }
     }
 
-    @GetMapping(value = "index", produces = MediaType.APPLICATION_JSON_VALUE)
+   /* @GetMapping(value = "index", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "index", notes = "index")
     @ResponseBody
     public JsonResult<String> loginSuccessMessage() {
@@ -74,7 +71,7 @@ public class LoginController {
             username = currentLoginUser.getUserName();
         }
         return JsonResultBuilder.build(username);
-    }
+    }*/
 
     @GetMapping(value = "logout", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "退出", notes = "退出")
@@ -84,4 +81,52 @@ public class LoginController {
         return JsonResultBuilder.build("退出成功");
     }
 
+    @GetMapping(value = "toLogin")
+    public String toLogin(Model model) {
+        Subject subject = SecurityUtils.getSubject();
+        SysUser user=(SysUser) subject.getPrincipal();
+        if (user == null){
+            return "/home/login";
+        }else{
+            return "redirect:/auth/index";
+        }
+
+    }
+
+
+
+
+    @RequestMapping("index")
+    public String index(HttpSession session, Model model) {
+        Subject subject = SecurityUtils.getSubject();
+        SysUser user=(SysUser) subject.getPrincipal();
+        if (user == null){
+            return "home/login";
+        }else{
+            model.addAttribute("user",user);
+            return "home/index";
+        }
+    }
+
+    /**
+     * 跳转到无权限页面
+     * @param session
+     * @param model
+     * @return
+     */
+    @RequestMapping("/unauthorized")
+    public String unauthorized(HttpSession session, Model model) {
+        return "redirect:/unauthorized.html";
+    }
+
+
+    /**
+     * 解锁用户
+     * @return
+     */
+    @RequestMapping(value = "/unlockAccount",method = RequestMethod.GET)
+    @ResponseBody
+    public void unlockAccount(String userName) {
+        retryLimitHashedCredentialsMatcher.unlockAccount(userName);
+    }
 }

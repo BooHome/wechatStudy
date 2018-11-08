@@ -31,4 +31,6 @@ public interface SysRoleMapper {
     int updateByPrimaryKey(SysRole record);
 
     Set<String> findRoleNameByUserId(@Param("userId") int userId);
+
+    Set<SysRole> findRoleByUserId(@Param("userId") Integer id);
 }

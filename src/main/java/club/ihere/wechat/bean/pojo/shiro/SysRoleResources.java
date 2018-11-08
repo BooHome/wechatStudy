@@ -3,8 +3,8 @@ package club.ihere.wechat.bean.pojo.shiro;
 import java.io.Serializable;
 
 public class SysRoleResources implements Serializable {
-    private static final long serialVersionUID = 8841433872811285798L;
 
+    private static final long serialVersionUID = 123456782L;
     private Integer id;
 
     private Integer roleId;

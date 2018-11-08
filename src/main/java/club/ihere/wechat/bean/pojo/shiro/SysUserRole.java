@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class SysUserRole implements Serializable {
 
-    private static final long serialVersionUID = 8841433872811285710L;
+    private static final long serialVersionUID = 123456784L;
 
     private Integer id;
 

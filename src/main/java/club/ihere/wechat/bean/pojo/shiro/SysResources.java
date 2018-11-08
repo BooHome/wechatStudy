@@ -3,23 +3,27 @@ package club.ihere.wechat.bean.pojo.shiro;
 import java.io.Serializable;
 
 /**
- * @author
+ * @author fengs
  */
 public class SysResources implements Serializable {
 
-    private static final long serialVersionUID = 8841433872811285796L;
+    private static final long serialVersionUID = 123456789L;
 
     private Integer id;
 
-    private String userName;
+    private Integer pid;
 
-    private String resUrl;
+    private String name;
 
-    private Integer userType;
+    private String url;
 
-    private Integer parentId;
+    private String type;
 
-    private Integer userSort;
+    private Integer sort;
+
+    private String permission;
+
+    private Integer available;
 
     public Integer getId() {
         return id;
@@ -29,43 +33,59 @@ public class SysResources implements Serializable {
         this.id = id;
     }
 
-    public String getUserName() {
-        return userName;
+    public Integer getPid() {
+        return pid;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName == null ? null : userName.trim();
+    public void setPid(Integer pid) {
+        this.pid = pid;
     }
 
-    public String getResUrl() {
-        return resUrl;
+    public String getName() {
+        return name;
     }
 
-    public void setResUrl(String resUrl) {
-        this.resUrl = resUrl == null ? null : resUrl.trim();
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
     }
 
-    public Integer getUserType() {
-        return userType;
+    public String getUrl() {
+        return url;
     }
 
-    public void setUserType(Integer userType) {
-        this.userType = userType;
+    public void setUrl(String url) {
+        this.url = url == null ? null : url.trim();
     }
 
-    public Integer getParentId() {
-        return parentId;
+    public String getType() {
+        return type;
     }
 
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
+    public void setType(String type) {
+        this.type = type == null ? null : type.trim();
     }
 
-    public Integer getUserSort() {
-        return userSort;
+    public Integer getSort() {
+        return sort;
     }
 
-    public void setUserSort(Integer userSort) {
-        this.userSort = userSort;
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission == null ? null : permission.trim();
+    }
+
+    public Integer getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(Integer available) {
+        this.available = available;
     }
 }

@@ -54,7 +54,7 @@ public class RetryLimitHashedCredentialsMatcher extends SimpleCredentialsMatcher
             //如果用户登陆失败次数大于5次 抛出锁定用户异常  并修改数据库字段
             SysUser user = userService.findByUserName(username);
             if (user != null && "1".equals(user.getUserEnable())){
-                //数据库字段 默认为 0  就是正常状态 所以 要改为1
+                //数据库字段 默认为 0  就是锁定状态
                 //修改数据库的状态字段为锁定
                 user.setUserEnable(0);
                 userService.update(user);
@@ -68,7 +68,7 @@ public class RetryLimitHashedCredentialsMatcher extends SimpleCredentialsMatcher
         if (matches) {
             //如果正确,从缓存中将用户登录计数 清除
             redisManager.del(getRedisKickoutKey(username));
-        }{
+        }else{
             redisManager.set(getRedisKickoutKey(username), retryCount);
         }
         return matches;

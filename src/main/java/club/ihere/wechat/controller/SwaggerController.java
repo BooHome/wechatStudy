@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 /**
  * @author: fengshibo
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("swagger")
 @Api(tags = "swagger测试接口")
 public class SwaggerController {
+
 
     @Autowired
     @Qualifier("baseRedisTemplate")
