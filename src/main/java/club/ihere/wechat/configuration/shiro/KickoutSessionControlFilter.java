@@ -1,12 +1,5 @@
 package club.ihere.wechat.configuration.shiro;
 
-import java.io.Serializable;
-import java.util.Deque;
-import java.util.LinkedList;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-
 import club.ihere.wechat.bean.pojo.shiro.SysUser;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.DefaultSessionKey;
@@ -17,13 +10,20 @@ import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.util.Deque;
+import java.util.LinkedList;
+
 /**
  * @author
  */
 public class KickoutSessionControlFilter extends AccessControlFilter {
 
-    @Autowired
-    private ResourceUrlProvider resourceUrlProvider;
+   // @Autowired
+   // private ResourceUrlProvider resourceUrlProvider;
 
     /** 踢出后到的地址 */
     private String kickoutUrl;
@@ -117,10 +117,12 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
         //如果队列里的sessionId数超出最大会话数，开始踢人
         while(deque.size() > maxSession) {
             Serializable kickoutSessionId = null;
-            if(kickoutAfter) { //如果踢出后者
+            //如果踢出后者
+            if(kickoutAfter) {
                 kickoutSessionId=deque.getFirst();
                 kickoutSessionId = deque.removeFirst();
-            } else { //否则踢出前者
+            } else {
+                //否则踢出前者
                 kickoutSessionId = deque.removeLast();
             }
             try {
@@ -129,7 +131,8 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
                     //设置会话的kickout属性表示踢出了
                     kickoutSession.setAttribute("kickout", true);
                 }
-            } catch (Exception e) {//ignore exception
+            } catch (Exception e) {
+                //ignore exception
                 e.printStackTrace();
             }
         }
@@ -150,8 +153,9 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
     }
 
     private boolean isStaticFile(String path) {
-        String staticUri = resourceUrlProvider.getForLookupPath(path);
-        return staticUri != null;
+       // String staticUri = resourceUrlProvider.getForLookupPath(path);
+       // return staticUri != null;
+        return true;
     }
 
 }

@@ -62,7 +62,7 @@ public class ShiroConfig {
         //这里的/login是后台的接口名,非页面，如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
         shiroFilterFactoryBean.setLoginUrl("/auth/login");
         //这里的/index是后台的接口名,非页面,登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/auth/toIndex");
+        shiroFilterFactoryBean.setSuccessUrl("/index.html");
         //未授权界面,该配置无效，并不会进行页面跳转
         shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
         //自定义拦截器限制并发人数,参考博客：
@@ -79,6 +79,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/auth/toLogin", "anon");
         filterChainDefinitionMap.put("/", "anon");
         filterChainDefinitionMap.put("/auth/index", "anon");
+        filterChainDefinitionMap.put("/kickout.html", "anon");
 
         filterChainDefinitionMap.put("/swagger-resources", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");
@@ -89,6 +90,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/css/**", "anon");
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/img/**", "anon");
+        filterChainDefinitionMap.put("/html/**", "anon");
         filterChainDefinitionMap.put("/Captcha.jpg", "anon");
 
         filterChainDefinitionMap.put("/druid/**", "anon");
@@ -96,6 +98,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/unlockAccount", "anon");
         //logout是shiro提供的过滤器
         filterChainDefinitionMap.put("/auth/logout", "logout");
+        filterChainDefinitionMap.put("/logout.html", "logout");
         //此时访问/user/delete需要delete权限,在自定义Realm中为用户授权。
         //filterChainDefinitionMap.put("/user/delete", "perms[\"user:delete\"]");
 
@@ -415,6 +418,7 @@ public class ShiroConfig {
      *
      * @return
      */
+    @Bean
     public KickoutSessionControlFilter kickoutSessionControlFilter() {
         KickoutSessionControlFilter kickoutSessionControlFilter = new KickoutSessionControlFilter();
         //用于根据会话ID，获取会话进行踢出操作的；
@@ -426,7 +430,7 @@ public class ShiroConfig {
         //同一个用户最大的会话数，默认1；比如2的意思是同一个用户允许最多同时两个人登录；
         kickoutSessionControlFilter.setMaxSession(1);
         //被踢出后重定向到的地址；
-        kickoutSessionControlFilter.setKickoutUrl("/auth/toLogin?kickout=1");
+        kickoutSessionControlFilter.setKickoutUrl("/kickout.html");
         return kickoutSessionControlFilter;
     }
 
