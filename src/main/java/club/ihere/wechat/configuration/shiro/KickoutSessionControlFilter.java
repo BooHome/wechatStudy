@@ -27,6 +27,7 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
 
     private ResourceUrlProvider resourceUrlProvider;
 
+
     /**
      * 踢出后到的地址
      */
@@ -162,9 +163,9 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
     }
 
     private boolean isStaticFile(String path) {
-//        String staticUri = resourceUrlProvider.getForLookupPath(path);
-        //      return staticUri != null;
-        return false;
+        resourceUrlProvider = new ResourceUrlProvider();
+        String staticUri = resourceUrlProvider.getForLookupPath(path);
+        return staticUri != null;
     }
 
 }

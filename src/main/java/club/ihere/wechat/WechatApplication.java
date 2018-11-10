@@ -10,7 +10,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableSwagger2Doc
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 @MapperScan("club.ihere.wechat.mapper")
 public class WechatApplication {
 

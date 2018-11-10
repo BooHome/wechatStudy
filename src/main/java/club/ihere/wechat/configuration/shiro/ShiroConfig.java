@@ -25,15 +25,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
-import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 import javax.servlet.Filter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -61,7 +55,7 @@ public class ShiroConfig {
         //必须设置 SecurityManager,Shiro的核心安全接口
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         //这里的/login是后台的接口名,非页面，如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
-        shiroFilterFactoryBean.setLoginUrl("/auth/login");
+        shiroFilterFactoryBean.setLoginUrl("/auth/toLogin");
         //这里的/index是后台的接口名,非页面,登录成功后要跳转的链接
         shiroFilterFactoryBean.setSuccessUrl("/auth/index");
         //未授权界面,该配置无效，并不会进行页面跳转
@@ -78,9 +72,11 @@ public class ShiroConfig {
         //配置不登录可以访问的资源，anon 表示资源都可以匿名访问
         //配置记住我或认证通过可以访问的地址
         filterChainDefinitionMap.put("/auth/toLogin", "anon");
+        filterChainDefinitionMap.put("/static/**", "anon");
         filterChainDefinitionMap.put("/", "anon");
         filterChainDefinitionMap.put("/auth/index", "anon");
-        filterChainDefinitionMap.put("/kickout.html", "anon");
+        //解锁用户专用 测试用的
+        filterChainDefinitionMap.put("/auth/unlockAccount", "anon");
 
         filterChainDefinitionMap.put("/swagger-resources", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");
@@ -88,27 +84,18 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/swagger-resources/**", "anon");
         filterChainDefinitionMap.put("/v2/**", "anon");
 
-        filterChainDefinitionMap.put("/css/**", "anon");
-        filterChainDefinitionMap.put("/js/**", "anon");
-        filterChainDefinitionMap.put("/img/**", "anon");
-        filterChainDefinitionMap.put("/html/**", "anon");
         filterChainDefinitionMap.put("/Captcha.jpg", "anon");
-
         filterChainDefinitionMap.put("/druid/**", "anon");
-        //解锁用户专用 测试用的
-        filterChainDefinitionMap.put("/auth/unlockAccount", "anon");
+
         //logout是shiro提供的过滤器
         filterChainDefinitionMap.put("/auth/logout", "logout");
         filterChainDefinitionMap.put("/logout.html", "logout");
         //此时访问/user/delete需要delete权限,在自定义Realm中为用户授权。
         //filterChainDefinitionMap.put("/user/delete", "perms[\"user:delete\"]");
-
-        //其他资源都需要认证  authc 表示需要认证才能进行访问 user表示配置记住我或认证通过可以访问的地址
-        //如果开启限制同一账号登录,改为 .put("/**", "kickout,user");
+        //其他资源都需要认证  authc 表示需要认证才能进行访问 user表示配置记住我或认证通过可以访问的地址. 如果开启限制同一账号登录,改为
         filterChainDefinitionMap.put("/**", "kickout,user");
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
-
         return shiroFilterFactoryBean;
     }
 
@@ -216,18 +203,15 @@ public class ShiroConfig {
      */
     @Bean
     public WebServerFactoryCustomizer<ConfigurableWebServerFactory> containerCustomizer() {
-        return new WebServerFactoryCustomizer<ConfigurableWebServerFactory>() {
-            @Override
-            public void customize(ConfigurableWebServerFactory factory) {
-                ErrorPage error401Page = new ErrorPage(HttpStatus.UNAUTHORIZED, "/unauthorized.html");
-                ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/404.html");
-                ErrorPage error500Page = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
-                Set<ErrorPage> errorPageSet = new HashSet<>();
-                errorPageSet.add(error401Page);
-                errorPageSet.add(error404Page);
-                errorPageSet.add(error500Page);
-                factory.setErrorPages(errorPageSet);
-            }
+        return factory -> {
+            ErrorPage error401Page = new ErrorPage(HttpStatus.UNAUTHORIZED, "/static/unauthorized.html");
+            ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/static/404.html");
+            ErrorPage error500Page = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/static/500.html");
+            Set<ErrorPage> errorPageSet = new HashSet<>();
+            errorPageSet.add(error401Page);
+            errorPageSet.add(error404Page);
+            errorPageSet.add(error500Page);
+            factory.setErrorPages(errorPageSet);
         };
     }
 
@@ -432,7 +416,7 @@ public class ShiroConfig {
         //同一个用户最大的会话数，默认1；比如2的意思是同一个用户允许最多同时两个人登录；
         kickoutSessionControlFilter.setMaxSession(1);
         //被踢出后重定向到的地址；
-        kickoutSessionControlFilter.setKickoutUrl("/kickout.html");
+        kickoutSessionControlFilter.setKickoutUrl("/static/kickout.html");
         return kickoutSessionControlFilter;
     }
 
@@ -445,7 +429,6 @@ public class ShiroConfig {
     public RetryLimitHashedCredentialsMatcher retryLimitHashedCredentialsMatcher() {
         RetryLimitHashedCredentialsMatcher retryLimitHashedCredentialsMatcher = new RetryLimitHashedCredentialsMatcher();
         retryLimitHashedCredentialsMatcher.setRedisManager(redisManager());
-
         //如果密码加密,可以打开下面配置
         //加密算法的名称
         //retryLimitHashedCredentialsMatcher.setHashAlgorithmName("MD5");
@@ -453,7 +436,6 @@ public class ShiroConfig {
         //retryLimitHashedCredentialsMatcher.setHashIterations(1024);
         //是否存储为16进制
         //retryLimitHashedCredentialsMatcher.setStoredCredentialsHexEncoded(true);
-
         return retryLimitHashedCredentialsMatcher;
     }
 }
