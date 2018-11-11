@@ -1,6 +1,7 @@
 package club.ihere.wechat.configuration.shiro;
 
 import club.ihere.wechat.bean.pojo.shiro.SysUser;
+import club.ihere.wechat.common.enums.ShiroEnums;
 import club.ihere.wechat.service.shiro.UserService;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -53,10 +54,10 @@ public class RetryLimitHashedCredentialsMatcher extends SimpleCredentialsMatcher
         if (retryCount.incrementAndGet() > 5) {
             //如果用户登陆失败次数大于5次 抛出锁定用户异常  并修改数据库字段
             SysUser user = userService.findByUserName(username);
-            if (user != null && "1".equals(user.getUserEnable())){
+            if (user != null && ShiroEnums.UserStatusEnum.OPEN_STATUS.getValue().equals(user.getUserEnable())){
                 //数据库字段 默认为 0  就是锁定状态
                 //修改数据库的状态字段为锁定
-                user.setUserEnable(0);
+                user.setUserEnable(ShiroEnums.UserStatusEnum.CLOSE_STATUS.getValue());
                 userService.update(user);
             }
             logger.info("锁定用户" + user.getUserName());
@@ -83,7 +84,7 @@ public class RetryLimitHashedCredentialsMatcher extends SimpleCredentialsMatcher
         SysUser user = userService.findByUserName(username);
         if (user != null){
             //修改数据库的状态字段为正常
-            user.setUserEnable(1);
+            user.setUserEnable(ShiroEnums.UserStatusEnum.OPEN_STATUS.getValue());
             userService.update(user);
             redisManager.del(getRedisKickoutKey(username));
         }

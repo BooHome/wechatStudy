@@ -3,6 +3,7 @@ package club.ihere.wechat.configuration.shiro;
 import club.ihere.wechat.bean.pojo.shiro.SysResources;
 import club.ihere.wechat.bean.pojo.shiro.SysRole;
 import club.ihere.wechat.bean.pojo.shiro.SysUser;
+import club.ihere.wechat.common.enums.ShiroEnums;
 import club.ihere.wechat.service.shiro.ResourcesService;
 import club.ihere.wechat.service.shiro.SysRoleService;
 import club.ihere.wechat.service.shiro.UserService;
@@ -10,8 +11,10 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.cache.Cache;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,8 @@ public class BaseShiroRealm extends AuthorizingRealm {
     @Autowired
     private ResourcesService resourcesService;
 
+    @Autowired
+    private RedisManager redisManager;
     /**
      * 验证用户身份
      * @param authenticationToken
@@ -48,7 +53,7 @@ public class BaseShiroRealm extends AuthorizingRealm {
         //获取用户名 密码 第二种方式
         UsernamePasswordToken usernamePasswordToken = (UsernamePasswordToken) authenticationToken;
         String username = usernamePasswordToken.getUsername();
-        String password = new String(usernamePasswordToken.getPassword());
+        //String password = new String(usernamePasswordToken.getPassword());
         //从数据库查询用户信息
         SysUser user = this.userService.findByUserName(username);
         //可以在这里直接对用户名校验,或者调用 CredentialsMatcher 校验
@@ -59,7 +64,7 @@ public class BaseShiroRealm extends AuthorizingRealm {
         //if (!password.equals(user.getPassword())) {
         //    throw new IncorrectCredentialsException("用户名或密码错误！");
         //}
-        if ("0".equals(user.getUserEnable())) {
+        if (ShiroEnums.UserStatusEnum.CLOSE_STATUS.getValue().equals(user.getUserEnable())) {
             throw new LockedAccountException("账号已被锁定,请联系管理员！");
         }
         //调用 CredentialsMatcher 校验 还需要创建一个类 继承CredentialsMatcher  如果在上面校验了,这个就不需要了
@@ -94,7 +99,7 @@ public class BaseShiroRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        logger.info("查询权限方法调用了！！！");
+        logger.info("查询权限方法调用");
         //获取用户
         SysUser user = (SysUser) SecurityUtils.getSubject().getPrincipal();
         //获取用户角色
@@ -119,7 +124,27 @@ public class BaseShiroRealm extends AuthorizingRealm {
      */
     @Override
     public void clearCachedAuthorizationInfo(PrincipalCollection principals) {
-        super.clearCachedAuthorizationInfo(principals);
+        Cache c = getAuthenticationCache();
+        logger.info("清除【认证】缓存之前");
+        for(Object o : c.keys()){
+            logger.info( o + " , " + c.get(o));
+        }
+        super.clearCachedAuthenticationInfo(principals);
+        logger.info("调用父类清除【认证】缓存之后");
+        for(Object o : c.keys()){
+            logger.info( o + " , " + c.get(o));
+        }
+        // 添加下面的代码清空【认证】的缓存
+        SysUser user = (SysUser) principals.getPrimaryPrincipal();
+        redisManager.del(KickoutSessionControlFilter.DEFAULT_KICKOUT_CACHE_KEY_PREFIX+user.getUserName());
+        SimplePrincipalCollection spc = new SimplePrincipalCollection(user.getUserName(),getName());
+        super.clearCachedAuthenticationInfo(spc);
+        logger.info("添加了代码清除【认证】缓存之后");
+        int cacheSize = c.keys().size();
+        logger.info("【认证】缓存的大小:" + c.keys().size());
+        if (cacheSize == 0){
+            logger.info("说明【认证】缓存被清空了。");
+        }
     }
 
     /**
@@ -128,7 +153,21 @@ public class BaseShiroRealm extends AuthorizingRealm {
      */
     @Override
     public void clearCachedAuthenticationInfo(PrincipalCollection principals) {
-        super.clearCachedAuthenticationInfo(principals);
+        logger.info("清除【授权】缓存之前");
+        Cache c = getAuthorizationCache();
+        for(Object o : c.keys()){
+            logger.info( o + " , " + c.get(o));
+        }
+        super.clearCachedAuthorizationInfo(principals);
+        logger.info("清除【授权】缓存之后");
+        int cacheSize = c.keys().size();
+        logger.info("【授权】缓存的大小:" + cacheSize);
+        for(Object o : c.keys()){
+            logger.info( o + " , " + c.get(o));
+        }
+        if(cacheSize == 0){
+            logger.info("说明【授权】缓存被清空了。");
+        }
     }
 
     @Override

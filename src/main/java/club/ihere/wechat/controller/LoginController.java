@@ -2,6 +2,7 @@ package club.ihere.wechat.controller;
 
 import club.ihere.wechat.aspect.annotation.AvoidRepeatableCommit;
 import club.ihere.wechat.bean.pojo.shiro.SysUser;
+import club.ihere.wechat.common.config.ConstantConfig;
 import club.ihere.wechat.common.exception.ParameterValidationException;
 import club.ihere.wechat.common.json.JsonResult;
 import club.ihere.wechat.common.json.JsonResultBuilder;
@@ -10,7 +11,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
+import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -25,12 +28,15 @@ import javax.servlet.http.HttpSession;
  * @author
  */
 @Controller
-@RequestMapping(value = "/auth")
+@RequestMapping(value = "/")
 @Api(tags = "登陆测试接口")
 public class LoginController {
 
     @Resource(name = "credentialsMatcher")
     private RetryLimitHashedCredentialsMatcher retryLimitHashedCredentialsMatcher;
+
+    @Autowired
+    private SessionDAO sessionDAO;
 
     @PostMapping(value = "login", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "login", notes = "login")
@@ -38,8 +44,21 @@ public class LoginController {
     @ResponseBody
     public JsonResult<SysUser> submitLogin(String username, String password) {
         try {
-            UsernamePasswordToken token = new UsernamePasswordToken(username, password);
             Subject subject = SecurityUtils.getSubject();
+            if (subject.isAuthenticated()) {
+                return null;
+            }
+            //如果用户已登录，先踢出
+            UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+            //提前1秒去判断   防止这个if没进  等执行下面的时候它却失效了  <span style="font-family: Arial, Helvetica, sans-serif;">lengthenTimeOut是失效时间</span>
+            if ((System.currentTimeMillis() - subject.getSession().getStartTimestamp().getTime()) >= ConstantConfig.getIntVal("shiro.redis.setExpire") - 1000) {
+                //移除失效的session
+                sessionDAO.delete(subject.getSession());
+                //移除线程里面的subject
+                ThreadContext.remove(ThreadContext.SUBJECT_KEY);
+                //重新获取subject
+                subject = SecurityUtils.getSubject();
+            }
             subject.login(token);
             SysUser user = (SysUser) subject.getPrincipal();
             // 执行到这里说明用户已登录成功
@@ -75,41 +94,41 @@ public class LoginController {
 
     @GetMapping(value = "logout", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "退出", notes = "退出")
-    @ResponseBody
-    public JsonResult<String> logoutSuccessMessage() {
-
-        return JsonResultBuilder.build("退出成功");
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public String logout() {
+        //使用权限管理工具进行用户的退出，跳出登录，给出提示信息
+        SecurityUtils.getSubject().logout();
+        return "redirect:/toLogin";
     }
 
     @GetMapping(value = "toLogin")
     public String toLogin(Model model) {
         Subject subject = SecurityUtils.getSubject();
-        SysUser user=(SysUser) subject.getPrincipal();
-        if (user == null){
+        SysUser user = (SysUser) subject.getPrincipal();
+        if (user == null) {
             return "/home/login";
-        }else{
-            return "redirect:/auth/index";
+        } else {
+            return "redirect:/index";
         }
 
     }
 
 
-
-
     @RequestMapping("index")
     public String index(HttpSession session, Model model) {
         Subject subject = SecurityUtils.getSubject();
-        SysUser user=(SysUser) subject.getPrincipal();
-        if (user == null){
+        SysUser user = (SysUser) subject.getPrincipal();
+        if (user == null) {
             return "home/login";
-        }else{
-            model.addAttribute("user",user);
+        } else {
+            model.addAttribute("user", user);
             return "home/index";
         }
     }
 
     /**
      * 跳转到无权限页面
+     *
      * @param session
      * @param model
      * @return
@@ -122,9 +141,10 @@ public class LoginController {
 
     /**
      * 解锁用户
+     *
      * @return
      */
-    @RequestMapping(value = "/unlockAccount",method = RequestMethod.GET)
+    @RequestMapping(value = "/unlockAccount", method = RequestMethod.GET)
     @ResponseBody
     public void unlockAccount(String userName) {
         retryLimitHashedCredentialsMatcher.unlockAccount(userName);

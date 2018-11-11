@@ -22,9 +22,9 @@ public class BaseController {
         Subject subject = SecurityUtils.getSubject();
         SysUser user=(SysUser) subject.getPrincipal();
         if (user == null){
-            return "redirect:/auth/toLogin";
+            return "redirect:/toLogin";
         }else{
-            return "redirect:/auth/index";
+            return "redirect:/index";
         }
 
     }

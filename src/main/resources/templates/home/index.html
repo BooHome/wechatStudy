@@ -9,7 +9,6 @@
 <body>
 <h1 th:text="'欢迎' + ${user.userName } + '光临!请选择你的操作'"></h1><br/>
 <ul>
-    <h1 th:if="${msg != null }" th:text="${msg}" style="color: red"></h1>
 
     <shiro:hasPermission name="userInfo:add"><a href="/userInfo/add">点击添加固定用户信息(后台写死,方便测试)</a></shiro:hasPermission><br/>
     <shiro:hasPermission name="userInfo:del"><a href="/userInfo/del">点击删除固定用户信息(后台写死,方便测试)</a></shiro:hasPermission><br/>
@@ -46,6 +45,6 @@
     <!-- 如果当前Subject没有权限将显示body体内容 name="权限名" -->
     <shiro:lacksPermission name="userInfo:add">如果用户没有添加权限，显示的内容</shiro:lacksPermission><br/>
 </ul>
-<a href="/auth/logout">点我注销</a>
+<a href="/logout">点我注销</a>
 </body>
 </html>

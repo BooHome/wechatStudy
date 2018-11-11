@@ -96,7 +96,6 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
             //如果没有登录，直接进行之后的流程
             return true;
         }
-
         //如果有登录,判断是否访问的为静态资源，如果是游客允许访问的静态资源,直接返回true
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String path = httpServletRequest.getServletPath();
@@ -115,18 +114,15 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
         if (deque == null || deque.size() == 0) {
             deque = new LinkedList<Serializable>();
         }
-
         //如果队列里没有此sessionId，且用户没有被踢出；放入队列
         if (!deque.contains(sessionId) && session.getAttribute("kickout") == null) {
             deque.push(sessionId);
         }
-
         //如果队列里的sessionId数超出最大会话数，开始踢人
         while (deque.size() > maxSession) {
             Serializable kickoutSessionId = null;
             //如果踢出后者
             if (kickoutAfter) {
-                kickoutSessionId = deque.getFirst();
                 kickoutSessionId = deque.removeFirst();
             } else {
                 //否则踢出前者
@@ -143,9 +139,7 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
                 e.printStackTrace();
             }
         }
-
         redisManager.set(getRedisKickoutKey(username), deque);
-
         //如果被踢出了，直接退出，重定向到踢出后的地址
         if (session.getAttribute("kickout") != null) {
             //会话被踢出了
