@@ -30,25 +30,4 @@
             diskExpiryThreadIntervalSeconds="120"
     />
 
-
-    <!-- 登录记录缓存锁定 -->
-    <cache name="authenticationCache"
-           maxElementsInMemory="10000"
-           eternal="false"
-           timeToIdleSeconds="120"
-           timeToLiveSeconds="120"
-           overflowToDisk="false"
-           diskPersistent="false"
-           diskExpiryThreadIntervalSeconds="120">
-    </cache>
-    <!-- 登录记录缓存-->
-    <cache name="authorizationCache"
-           maxElementsInMemory="10000"
-           eternal="false"
-           timeToIdleSeconds="120"
-           timeToLiveSeconds="120"
-           overflowToDisk="false"
-           diskPersistent="false"
-           diskExpiryThreadIntervalSeconds="120">
-    </cache>
 </ehcache>

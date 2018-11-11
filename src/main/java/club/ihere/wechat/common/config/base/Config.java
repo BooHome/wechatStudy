@@ -1,9 +1,13 @@
 package club.ihere.wechat.common.config.base;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.configuration.FileConfiguration;
 import org.apache.commons.configuration.reloading.ReloadingStrategy;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 配置文件对象
@@ -23,6 +27,12 @@ public class Config {
 
 	public String getValue(String key) {
 		return configuration.getString(key);
+	}
+
+	public List<String>  getKeys() {
+		Iterator<String> stringIterator=configuration.getKeys();
+		List<String> result= IteratorUtils.toList(stringIterator);
+		return result;
 	}
 
 	public String getValue(String key, String defaultValue) {

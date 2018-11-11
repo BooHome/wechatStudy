@@ -25,9 +25,6 @@ import java.util.LinkedList;
  */
 public class KickoutSessionControlFilter extends AccessControlFilter {
 
-    private ResourceUrlProvider resourceUrlProvider;
-
-
     /**
      * 踢出后到的地址
      */
@@ -163,7 +160,7 @@ public class KickoutSessionControlFilter extends AccessControlFilter {
     }
 
     private boolean isStaticFile(String path) {
-        resourceUrlProvider = new ResourceUrlProvider();
+        ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
         String staticUri = resourceUrlProvider.getForLookupPath(path);
         return staticUri != null;
     }

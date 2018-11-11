@@ -2,6 +2,7 @@ package club.ihere.wechat.configuration.shiro;
 
 
 import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
+import club.ihere.wechat.common.config.ConstantConfig;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.SessionListener;
@@ -18,6 +19,7 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -55,11 +57,11 @@ public class ShiroConfig {
         //必须设置 SecurityManager,Shiro的核心安全接口
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         //这里的/login是后台的接口名,非页面，如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
-        shiroFilterFactoryBean.setLoginUrl("/auth/toLogin");
+        shiroFilterFactoryBean.setLoginUrl(ConstantConfig.gerStringVal("shiro.setLoginUrl"));
         //这里的/index是后台的接口名,非页面,登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/auth/index");
+        shiroFilterFactoryBean.setSuccessUrl(ConstantConfig.gerStringVal("shiro.setSuccessUrl"));
         //未授权界面,该配置无效，并不会进行页面跳转
-        shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
+        shiroFilterFactoryBean.setUnauthorizedUrl(ConstantConfig.gerStringVal("shiro.setUnauthorizedUrl"));
         //自定义拦截器限制并发人数,参考博客：
         LinkedHashMap<String, Filter> filtersMap = new LinkedHashMap<>();
         //限制同一帐号同时在线的个数
@@ -68,33 +70,7 @@ public class ShiroConfig {
         shiroFilterFactoryBean.setFilters(filtersMap);
         // 配置访问权限 必须是LinkedHashMap，因为它必须保证有序
         // 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 --> : 这是一个坑，一不小心代码就不好使了
-        LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-        //配置不登录可以访问的资源，anon 表示资源都可以匿名访问
-        //配置记住我或认证通过可以访问的地址
-        filterChainDefinitionMap.put("/auth/toLogin", "anon");
-        filterChainDefinitionMap.put("/static/**", "anon");
-        filterChainDefinitionMap.put("/", "anon");
-        filterChainDefinitionMap.put("/auth/index", "anon");
-        //解锁用户专用 测试用的
-        filterChainDefinitionMap.put("/auth/unlockAccount", "anon");
-
-        filterChainDefinitionMap.put("/swagger-resources", "anon");
-        filterChainDefinitionMap.put("/swagger-ui.html", "anon");
-        filterChainDefinitionMap.put("/webjars/**", "anon");
-        filterChainDefinitionMap.put("/swagger-resources/**", "anon");
-        filterChainDefinitionMap.put("/v2/**", "anon");
-
-        filterChainDefinitionMap.put("/Captcha.jpg", "anon");
-        filterChainDefinitionMap.put("/druid/**", "anon");
-
-        //logout是shiro提供的过滤器
-        filterChainDefinitionMap.put("/auth/logout", "logout");
-        filterChainDefinitionMap.put("/logout.html", "logout");
-        //此时访问/user/delete需要delete权限,在自定义Realm中为用户授权。
-        //filterChainDefinitionMap.put("/user/delete", "perms[\"user:delete\"]");
-        //其他资源都需要认证  authc 表示需要认证才能进行访问 user表示配置记住我或认证通过可以访问的地址. 如果开启限制同一账号登录,改为
-        filterChainDefinitionMap.put("/**", "kickout,user");
-
+        LinkedHashMap<String, String> filterChainDefinitionMap = ConstantConfig.getFilterChainDefinitionMap();
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }
@@ -190,8 +166,8 @@ public class ShiroConfig {
         SimpleMappingExceptionResolver simpleMappingExceptionResolver = new SimpleMappingExceptionResolver();
         Properties properties = new Properties();
         //这里的 /unauthorized 是页面，不是访问的路径
-        properties.setProperty("org.apache.shiro.authz.UnauthorizedException", "/unauthorized.html");
-        properties.setProperty("org.apache.shiro.authz.UnauthenticatedException", "/unauthorized.html");
+        properties.setProperty("org.apache.shiro.authz.UnauthorizedException", ConstantConfig.gerStringVal("shiro.static.setUnauthorizedUrl"));
+        properties.setProperty("org.apache.shiro.authz.UnauthenticatedException", ConstantConfig.gerStringVal("shiro.static.setUnauthorizedUrl"));
         simpleMappingExceptionResolver.setExceptionMappings(properties);
         return simpleMappingExceptionResolver;
     }
@@ -204,9 +180,9 @@ public class ShiroConfig {
     @Bean
     public WebServerFactoryCustomizer<ConfigurableWebServerFactory> containerCustomizer() {
         return factory -> {
-            ErrorPage error401Page = new ErrorPage(HttpStatus.UNAUTHORIZED, "/static/unauthorized.html");
-            ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/static/404.html");
-            ErrorPage error500Page = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/static/500.html");
+            ErrorPage error401Page = new ErrorPage(HttpStatus.UNAUTHORIZED, ConstantConfig.gerStringVal("shiro.static.setUnauthorizedUrl"));
+            ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, ConstantConfig.gerStringVal("shiro.static.set404Url"));
+            ErrorPage error500Page = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, ConstantConfig.gerStringVal("shiro.static.set500Url"));
             Set<ErrorPage> errorPageSet = new HashSet<>();
             errorPageSet.add(error401Page);
             errorPageSet.add(error404Page);
@@ -223,7 +199,7 @@ public class ShiroConfig {
     @Bean
     public SimpleCookie rememberMeCookie() {
         //这个参数是cookie的名称，对应前端的checkbox的name = rememberMe
-        SimpleCookie simpleCookie = new SimpleCookie("rememberMe");
+        SimpleCookie simpleCookie = new SimpleCookie(ConstantConfig.gerStringVal("shiro.setRememberMeParam"));
         //setcookie的httponly属性如果设为true的话，会增加对xss防护的安全系数。它有以下特点：
         //setcookie()的第七个参数
         //设为true后，只能通过http访问，javascript无法访问
@@ -231,7 +207,7 @@ public class ShiroConfig {
         simpleCookie.setHttpOnly(true);
         simpleCookie.setPath("/");
         //<!-- 记住我cookie生效时间30天 ,单位秒;-->
-        simpleCookie.setMaxAge(2592000);
+        simpleCookie.setMaxAge(ConstantConfig.getIntVal("shiro.setMaxAge"));
         return simpleCookie;
     }
 
@@ -245,7 +221,7 @@ public class ShiroConfig {
         CookieRememberMeManager cookieRememberMeManager = new CookieRememberMeManager();
         cookieRememberMeManager.setCookie(rememberMeCookie());
         //rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度(128 256 512 位)
-        cookieRememberMeManager.setCipherKey(Base64.decode("4AvVhmFLUs0KTA3Kprsdag=="));
+        cookieRememberMeManager.setCipherKey(Base64.decode(ConstantConfig.gerStringVal("shiro.setCipherKey.base64Key")));
         return cookieRememberMeManager;
     }
 
@@ -258,7 +234,7 @@ public class ShiroConfig {
     public FormAuthenticationFilter formAuthenticationFilter() {
         FormAuthenticationFilter formAuthenticationFilter = new FormAuthenticationFilter();
         //对应前端的checkbox的name = rememberMe
-        formAuthenticationFilter.setRememberMeParam("rememberMe");
+        formAuthenticationFilter.setRememberMeParam(ConstantConfig.gerStringVal("shiro.setRememberMeParam"));
         return formAuthenticationFilter;
     }
 
@@ -273,9 +249,9 @@ public class ShiroConfig {
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
         //redis中针对不同用户缓存
-        redisCacheManager.setPrincipalIdFieldName("userName");
+        redisCacheManager.setPrincipalIdFieldName(ConstantConfig.gerStringVal("shiro.setPrincipalIdFieldName"));
         //用户权限信息缓存时间
-        redisCacheManager.setExpire(200000);
+        redisCacheManager.setExpire(ConstantConfig.getIntVal("shiro.auth.setExpire"));
         return redisCacheManager;
     }
 
@@ -339,7 +315,7 @@ public class ShiroConfig {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
         //session在redis中的保存时间,最好大于session会话超时时间
-        redisSessionDAO.setExpire(12000);
+        redisSessionDAO.setExpire(ConstantConfig.getIntVal("shiro.redis.setExpire"));
         return redisSessionDAO;
     }
 
@@ -353,9 +329,8 @@ public class ShiroConfig {
     @Bean("sessionIdCookie")
     public SimpleCookie sessionIdCookie() {
         //这个参数是cookie的名称
-        SimpleCookie simpleCookie = new SimpleCookie("sid");
+        SimpleCookie simpleCookie = new SimpleCookie(ConstantConfig.gerStringVal("shiro.SimpleCookie.name"));
         //setcookie的httponly属性如果设为true的话，会增加对xss防护的安全系数。它有以下特点：
-
         //setcookie()的第七个参数
         //设为true后，只能通过http访问，javascript无法访问
         //防止xss读取cookie
@@ -384,7 +359,7 @@ public class ShiroConfig {
         sessionManager.setSessionFactory(sessionFactory());
 
         //全局会话超时时间（单位毫秒），默认30分钟  暂时设置为10秒钟 用来测试
-        sessionManager.setGlobalSessionTimeout(1800000);
+        sessionManager.setGlobalSessionTimeout(ConstantConfig.getIntVal("shiro.redis.setGlobalSessionTimeout"));
         //是否开启删除无效的session对象  默认为true
         sessionManager.setDeleteInvalidSessions(true);
         //是否开启定时调度器进行检测过期session 默认为true
@@ -392,7 +367,7 @@ public class ShiroConfig {
         //设置session失效的扫描时间, 清理用户直接关闭浏览器造成的孤立会话 默认为 1个小时
         //设置该属性 就不需要设置 ExecutorServiceSessionValidationScheduler 底层也是默认自动调用ExecutorServiceSessionValidationScheduler
         //暂时设置为 5秒 用来测试
-        sessionManager.setSessionValidationInterval(3600000);
+        sessionManager.setSessionValidationInterval(ConstantConfig.getIntVal("shiro.redis.setSessionValidationInterval"));
         //取消url 后面的 JSESSIONID
         sessionManager.setSessionIdUrlRewritingEnabled(false);
         return sessionManager;
@@ -416,7 +391,7 @@ public class ShiroConfig {
         //同一个用户最大的会话数，默认1；比如2的意思是同一个用户允许最多同时两个人登录；
         kickoutSessionControlFilter.setMaxSession(1);
         //被踢出后重定向到的地址；
-        kickoutSessionControlFilter.setKickoutUrl("/static/kickout.html");
+        kickoutSessionControlFilter.setKickoutUrl(ConstantConfig.gerStringVal("shiro.setKickoutUrl"));
         return kickoutSessionControlFilter;
     }
 
