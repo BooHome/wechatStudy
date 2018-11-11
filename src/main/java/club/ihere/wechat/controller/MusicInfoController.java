@@ -1,9 +1,13 @@
 package club.ihere.wechat.controller;
 
+import club.ihere.wechat.bean.pojo.shiro.SysResources;
+import club.ihere.wechat.bean.pojo.shiro.SysRole;
 import club.ihere.wechat.bean.pojo.shiro.SysUser;
 import club.ihere.wechat.common.json.JsonResult;
 import club.ihere.wechat.common.json.JsonResultBuilder;
 import club.ihere.wechat.common.util.RequestUtils;
+import club.ihere.wechat.service.shiro.ResourcesService;
+import club.ihere.wechat.service.shiro.SysRoleService;
 import club.ihere.wechat.service.shiro.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,16 +29,20 @@ import java.util.Set;
 public class MusicInfoController {
 
     @Autowired
-    private UserService userService;
+    private SysRoleService roleService;
+
+    @Autowired
+    private ResourcesService resourcesService;
 
     @GetMapping(value = "usersPage", produces = MediaType.APPLICATION_JSON_VALUE)
-    @RequiresPermissions({"/usersPage"})
+    @RequiresPermissions({"DEL"})
     @ApiOperation(value = "usersPage", notes = "usersPage")
     @ResponseBody
-    public JsonResult<String> login(){
+    public JsonResult<Set<SysResources>> login() {
         SysUser user = RequestUtils.currentLoginUser();
-        Set<String> authorization = userService.findPermissionsByUserId(user.getId());
-        return JsonResultBuilder.build("该用户有如下权限" + authorization);
+        Set<SysRole> roles = roleService.findRoleByUserId(user.getId());
+        Set<SysResources> sysResourcesByRoleId = resourcesService.findSysResourcesByRoleId(roles);
+        return JsonResultBuilder.build(sysResourcesByRoleId);
     }
 
 }

@@ -34,7 +34,7 @@ public class ResourcesServiceImpl implements ResourcesService {
         sysRoleResourcesExample.createCriteria().andRoleIdIn(roleIds);
         List<SysRoleResources> sysRoleResources = sysRoleResourcesMapper.selectByExample(sysRoleResourcesExample);
         SysResourcesExample sysResourcesExample=new SysResourcesExample();
-        List<Integer> sysRoleResourcesIds=sysRoleResources.stream().map(SysRoleResources::getId).collect(Collectors.toList());
+        List<Integer> sysRoleResourcesIds=sysRoleResources.stream().map(SysRoleResources::getResourcesId).collect(Collectors.toList());
         sysResourcesExample.createCriteria().andIdIn(sysRoleResourcesIds);
         List<SysResources> sysResourcesList=sysResourcesMapper.selectByExample(sysResourcesExample);
         return  new HashSet<>(sysResourcesList);

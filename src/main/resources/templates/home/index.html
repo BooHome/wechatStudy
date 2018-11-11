@@ -37,13 +37,13 @@
     <!-- 如果当前Subject没有角色将显示body体内容 -->
     <shiro:lacksRole name="admin">如果不是admin角色,显示内容</shiro:lacksRole><br/>
     <!-- 如果当前Subject有权限将显示body体内容 name="权限名" -->
-    <shiro:hasPermission name="userInfo:add">用户拥有添加权限</shiro:hasPermission><br/>
+    <shiro:hasPermission name="ADD">用户拥有添加权限</shiro:hasPermission><br/>
     <!-- 用户同时拥有以下两种权限,显示内容 -->
-    <shiro:hasAllPermissions name="userInfo:add,userInfo:view">用户同时拥有列表权限和添加权限</shiro:hasAllPermissions><br/>
+    <shiro:hasAllPermissions name="ADD,view">用户同时拥有列表权限和添加权限</shiro:hasAllPermissions><br/>
     <!-- 用户拥有以下权限任意一种 -->
-    <shiro:hasAnyPermissions name="userInfo:view,userInfo:del">用户拥有列表权限或者删除权限</shiro:hasAnyPermissions><br/>
+    <shiro:hasAnyPermissions name="view,DEL">用户拥有列表权限或者删除权限</shiro:hasAnyPermissions><br/>
     <!-- 如果当前Subject没有权限将显示body体内容 name="权限名" -->
-    <shiro:lacksPermission name="userInfo:add">如果用户没有添加权限，显示的内容</shiro:lacksPermission><br/>
+    <shiro:lacksPermission name="DD">如果用户没有添加权限，显示的内容</shiro:lacksPermission><br/>
 </ul>
 <a href="/logout">点我注销</a>
 </body>

@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SysResourcesMapper sysResourcesMapper;
 
-    @Override
+   /* @Override
     public Set<String> findPermissionsByUserId(int userId) {
         Set<String> permissions = sysResourcesMapper.findRoleNameByUserId(userId);
         Set<String> result = new HashSet<>();
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
             result.addAll(Arrays.asList(permission.split("\\s*;\\s*")));
         }
         return result;
-    }
+    }*/
 
     @Override
     public SysUser getUserByUserInfo(SysUser user) {
