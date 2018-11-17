@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -37,6 +39,22 @@ public class LoginController {
 
     @Autowired
     private SessionDAO sessionDAO;
+
+    /**
+     * 访问项目根路径
+     * @return
+     */
+    @RequestMapping(value = "/",method = RequestMethod.GET)
+    public String root(Model model) {
+        Subject subject = SecurityUtils.getSubject();
+        SysUser user=(SysUser) subject.getPrincipal();
+        if (user == null){
+            return "redirect:/toLogin";
+        }else{
+            return "redirect:/index";
+        }
+
+    }
 
     @PostMapping(value = "login", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "login", notes = "login")
@@ -79,18 +97,6 @@ public class LoginController {
             throw new ParameterValidationException("发生未知错误");
         }
     }
-
-   /* @GetMapping(value = "index", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "index", notes = "index")
-    @ResponseBody
-    public JsonResult<String> loginSuccessMessage() {
-        String username = "未登录";
-        SysUser currentLoginUser = RequestUtils.currentLoginUser();
-        if (currentLoginUser != null && StringUtils.isNotEmpty(currentLoginUser.getUserName())) {
-            username = currentLoginUser.getUserName();
-        }
-        return JsonResultBuilder.build(username);
-    }*/
 
     @GetMapping(value = "logout", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "退出", notes = "退出")
@@ -148,5 +154,18 @@ public class LoginController {
     @ResponseBody
     public void unlockAccount(String userName) {
         retryLimitHashedCredentialsMatcher.unlockAccount(userName);
+    }
+
+    /**
+     * 未登录，shiro应重定向到登录界面，此处返回未登录状态信息由前端控制跳转页面
+     * @return
+     */
+    @RequestMapping(value = "/unauth")
+    @ResponseBody
+    public JsonResult<Map> unauth() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("code", "1000000");
+        map.put("msg", "未登录");
+        return JsonResultBuilder.build(map);
     }
 }
