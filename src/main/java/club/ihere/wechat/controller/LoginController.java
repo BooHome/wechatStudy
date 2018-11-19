@@ -60,14 +60,14 @@ public class LoginController {
     @ApiOperation(value = "login", notes = "login")
     @AvoidRepeatableCommit
     @ResponseBody
-    public JsonResult<SysUser> submitLogin(String username, String password) {
+    public JsonResult<SysUser> submitLogin(String username, String password,Boolean rememberMe) {
         try {
             Subject subject = SecurityUtils.getSubject();
+            //如果用户已登录，先踢出
             if (subject.isAuthenticated()) {
                 return null;
             }
-            //如果用户已登录，先踢出
-            UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+            UsernamePasswordToken token = new UsernamePasswordToken(username, password,rememberMe==null?false:rememberMe);
             //提前1秒去判断   防止这个if没进  等执行下面的时候它却失效了  <span style="font-family: Arial, Helvetica, sans-serif;">lengthenTimeOut是失效时间</span>
             if ((System.currentTimeMillis() - subject.getSession().getStartTimestamp().getTime()) >= ConstantConfig.getIntVal("shiro.redis.setExpire") - 1000) {
                 //移除失效的session
@@ -94,6 +94,7 @@ public class LoginController {
         } catch (AuthenticationException e) {
             throw new ParameterValidationException("用户名或密码错误");
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ParameterValidationException("发生未知错误");
         }
     }
